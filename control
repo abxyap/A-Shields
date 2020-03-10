@@ -1,0 +1,9 @@
+Package: com.rpgfarm.a-shields
+Name: A-Shields
+Depends: mobilesubstrate
+Version: 1.1.9
+Architecture: iphoneos-arm
+Description: Protect your device
+Maintainer: Baw Appie <pp121324@gmail.com>
+Author: Baw Appie <pp121324@gmail.com>
+Section: Tweaks
