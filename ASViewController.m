@@ -26,7 +26,7 @@ NSString *getType() {
 			typeCache = [type copy];
 			return type;
 		} @catch(NSException *ex) {
-			return @"Error";
+			return @"Biometry Authentication";
 		}
 	} else return typeCache;
 }

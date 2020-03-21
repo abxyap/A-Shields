@@ -57,8 +57,16 @@
 - (SBApplication *)application;
 - (id)applicationBundleID;
 @end
-@interface SBIconView : NSObject
+@interface SBIconImageView : UIView
+@property (nonatomic,readonly) SBIcon * icon;
+@end
+@interface SBIconView : UIView
+@property (nonatomic, retain) UIImageView *lockImageView;
 @property (nonatomic, assign) SBIcon *icon;
+-(void)setIconImageAlpha:(double)arg1;
+-(void)setIconAccessoryAlpha:(double)arg1;
+-(void)_applyIconImageAlpha:(double)arg1;
+-(SBIconImageView *)_iconImageView;
 @end
 @interface SBUIIconForceTouchViewController
 -(void)_presentAnimated:(BOOL)arg1 withCompletionHandler:(/*^block*/id)arg2 ;

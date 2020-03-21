@@ -26,7 +26,7 @@ NSString *getType() {
 			typeCache = [type copy];
 			return type;
 		} @catch(NSException *ex) {
-			return @"Error";
+			return @"Biometry Authentication";
 		}
 	} else return typeCache;
 }
@@ -59,6 +59,34 @@ NSString *getType() {
   [[ASViewController sharedInstance] setSession:false];
   [[ASViewController sharedInstance] closeAlert];
 	[[ASWindow sharedInstance] setTouchInjection:false];
+}
+%end
+
+%hook SBIconView
+%property (nonatomic, retain) UIImageView *lockImageView;
+-(void)_updateLabel {
+	SBIcon *icon = self.icon;
+	SBApplication *app = [icon application];
+	NSString *bundleID = [app bundleIdentifier];
+	if(bundleID == nil) return;
+	if([prefs[@"badge"] isEqual:@1] && ![[ASViewController sharedInstance] session] && !(prefs[@"wifi"] && [prefs[@"wifi"][[[objc_getClass("SBWiFiManager") sharedInstance] currentNetworkName]] isEqual:@1]) && [prefs[@"app"][bundleID] isEqual:@1]) {
+		[self setIconImageAlpha:0.3];
+		[self setIconAccessoryAlpha:0.3];
+		[self _applyIconImageAlpha:0.3];
+		if(!self.lockImageView) {
+			self.lockImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"/Library/BawAppie/AShields/lock.png"]];
+			CGFloat width = self.frame.size.width;
+			self.lockImageView.frame = CGRectMake(width/2-width/4, width/2-width/4, width/2, width/2);
+			[self addSubview:self.lockImageView];
+		} else {
+			CGFloat width = self.frame.size.width;
+			self.lockImageView.frame = CGRectMake(width/2-width/4, width/2-width/4, width/2, width/2);
+		}
+	} else if(self.lockImageView) {
+		[self.lockImageView removeFromSuperview];
+		self.lockImageView = nil;
+	}
+	%orig;
 }
 %end
 
