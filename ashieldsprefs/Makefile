@@ -1,9 +1,5 @@
-ARCHS = arm64
-OS := $(shell uname)
-ifeq ($(OS),Darwin)
-	TARGET = iphone:11.2:11.2
-  ARCHS += arm64e
-endif
+TARGET = iphone:12.2:12.2
+ARCHS = arm64 arm64e
 
 include $(THEOS)/makefiles/common.mk
 
