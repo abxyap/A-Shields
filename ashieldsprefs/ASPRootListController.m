@@ -8,6 +8,7 @@
 #import "ASPApplicationSelectController.h"
 #import "ASPWiFiNetworksController.h"
 #import "ASPControlCenterController.h"
+#import "ASPCustomizeController.h"
 
 #import "../ASViewController.h"
 
@@ -69,6 +70,7 @@ NSMutableDictionary *prefs;
 			[specifier.properties setValue:@"badge" forKey:@"displayIdentifier"];
 			specifier;
 		})];
+		[specifiers addObject:[PSSpecifier preferenceSpecifierNamed:@"Customize" target:nil set:nil get:nil detail:[ASPCustomizeController class] cell:PSLinkListCell edit:nil]];
 		[specifiers addObject:[PSSpecifier preferenceSpecifierNamed:@"Trusted WiFi Networks" target:nil set:nil get:nil detail:[ASPWiFiNetworksController class] cell:PSLinkListCell edit:nil]];
 
 		[specifiers addObject:[PSSpecifier preferenceSpecifierNamed:@"Passcode Settings" target:self set:nil get:nil detail:nil cell:PSGroupCell edit:nil]];

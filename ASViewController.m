@@ -9,6 +9,7 @@
 #import "./ASScanner.h"
 #import "./ASViewController.h"
 #import "./ASWindow.h"
+#import <libcolorpicker.h>
 
 PKGlyphView *fingerglyph;
 NSMutableDictionary *prefs;
@@ -87,7 +88,7 @@ void loadPrefs() {
 				callback(true);
 				AudioServicesPlaySystemSound(1519);
 			} else {
-				[self.alert setMessage:@"Authentication failed. Please try again."];
+				[self.alert setMessage:prefs[@"customize"][@"authFailMessage"] ?: @"Authentication failed. Please try again."];
 				AudioServicesPlaySystemSound(1521);
 				// if([getType() isEqualToString:@"Face ID"]) {
 				// 	[self.alert addAction:[UIAlertAction actionWithTitle:@"Retry Face ID" style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
@@ -129,10 +130,12 @@ void loadPrefs() {
 		[[ASScanner sharedInstance] startMonitoring];
 		[[ASWindow sharedInstance] setTouchInjection:true];
 
-		self.alert = [UIAlertController alertControllerWithTitle:[NSString stringWithFormat:@"\n\n%@", alertTitle] message:[NSString stringWithFormat:@"This device is protected by A-Shields\nUse %@ to continue.", getType()] preferredStyle:UIAlertControllerStyleAlert];
+		self.alert = [UIAlertController alertControllerWithTitle:[NSString stringWithFormat:@"\n\n%@", alertTitle] message:[NSString stringWithFormat:prefs[@"customize"][@"lockedMessage"] ?: @"This device is protected by A-Shields\nUse %@ to continue.", getType()] preferredStyle:UIAlertControllerStyleAlert];
 		if ([[ASWindow sharedInstance] respondsToSelector:@selector(_setSecure:)]) [[ASWindow sharedInstance] _setSecure:YES];
 
 		fingerglyph = [[objc_getClass("PKGlyphView") alloc] initWithStyle:0];
+		if(prefs[@"primaryColor"]) [fingerglyph _setPrimaryColor:LCPParseColorString(prefs[@"primaryColor"], @"#FFFFFF") animated:false];
+		if(prefs[@"secondaryColor"]) [fingerglyph _setSecondaryColor:LCPParseColorString(prefs[@"secondaryColor"], @"#FFFFFF") animated:false];
 		fingerglyph.frame = CGRectMake(120, 16, 32, 32);
 		[self.alert.view addSubview:fingerglyph];
 
@@ -149,7 +152,7 @@ void loadPrefs() {
 			if(prefs[@"passcode"]) [self.alert addAction:[UIAlertAction actionWithTitle:@"Use Passcode" style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
 			[[ASScanner sharedInstance] stopMonitoring];
 
-			self.alert = [UIAlertController alertControllerWithTitle:alertTitle message:@"This device is protected by A-Shields\nEnter passcode to continue." preferredStyle:UIAlertControllerStyleAlert];
+			self.alert = [UIAlertController alertControllerWithTitle:alertTitle message:prefs[@"customize"][@"lockedMessage"] ?: @"This device is protected by A-Shields\nEnter passcode to continue." preferredStyle:UIAlertControllerStyleAlert];
 
 			[self.alert addTextFieldWithConfigurationHandler:^(UITextField *textField) {
 				textField.placeholder = @"Passcode";
@@ -169,7 +172,7 @@ void loadPrefs() {
 					callback(true);
 					AudioServicesPlaySystemSound(1519);
 				} else {
-						self.alert = [UIAlertController alertControllerWithTitle:alertTitle message:@"Authentication failed. Please try again." preferredStyle:UIAlertControllerStyleAlert];
+						self.alert = [UIAlertController alertControllerWithTitle:alertTitle message:prefs[@"customize"][@"authFailMessage"] ?: @"Authentication failed. Please try again." preferredStyle:UIAlertControllerStyleAlert];
 						[self.alert addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
 							[[ASWindow sharedInstance] setTouchInjection:false];
 							callback(false);

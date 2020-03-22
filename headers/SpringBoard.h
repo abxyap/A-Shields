@@ -11,7 +11,8 @@
 
 - (instancetype)initWithStyle:(UITableViewStyle)style;
 - (void)setState:(NSInteger)state animated:(BOOL)animated completionHandler:(void (^)(void))block;
-
+-(void)_setPrimaryColor:(UIColor*)arg1 animated:(BOOL)arg2 ;
+-(void)_setSecondaryColor:(UIColor*)arg1 animated:(BOOL)arg2 ;
 @end
 
 @interface PSPasscodeField : UIView
