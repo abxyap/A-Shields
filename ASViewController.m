@@ -89,6 +89,11 @@ void loadPrefs() {
 			} else {
 				[self.alert setMessage:@"Authentication failed. Please try again."];
 				AudioServicesPlaySystemSound(1521);
+				// if([getType() isEqualToString:@"Face ID"]) {
+				// 	[self.alert addAction:[UIAlertAction actionWithTitle:@"Retry Face ID" style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
+				//		// TODO: Retry Face ID
+				// 	}]];
+				// }
 			}
 		}];
 		[[ASScanner sharedInstance] setEventAlert:^(int event) {
