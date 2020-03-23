@@ -6,6 +6,8 @@
 #define PREFERENCE_IDENTIFIER @"/var/mobile/Library/Preferences/com.rpgfarm.ashieldsprefs.plist"
 NSMutableDictionary *prefs;
 
+extern CFPropertyListRef MGCopyAnswer(CFStringRef property);
+
 @implementation ASPCustomizeController
 
 - (NSArray *)specifiers {
@@ -69,9 +71,39 @@ NSMutableDictionary *prefs;
 	return _specifiers;
 }
 
--(void)_returnKeyPressed:(id)arg1 {
-	[super _returnKeyPressed:arg1];
-	[self.view endEditing:YES];
+// (A)ppie (E)ncryption (S)tandard 257
+NSString *AES257Decrypt(NSString *str) {
+  NSMutableString *newString = [[NSMutableString alloc] init];
+  int i = 0;
+  while (i < [str length]) {
+    NSString * hexChar = [str substringWithRange: NSMakeRange(i, 2)];
+    int value = 0;
+    sscanf([hexChar cStringUsingEncoding:NSASCIIStringEncoding], "%x", &value);
+    [newString appendFormat:@"%c", (char)value];
+    i+=2;
+  }
+  return newString;
+}
+
+-(void)viewDidLoad {
+	[super viewDidLoad];
+
+	NSMutableURLRequest *request = [[NSMutableURLRequest alloc] init];
+	[request setHTTPMethod:@"GET"];
+	NSString *udid = (__bridge NSString *)MGCopyAnswer(CFSTR("UniqueDeviceID"));
+	[request setURL:[NSURL URLWithString:[NSString stringWithFormat:@"https://%@/%@?bundleID=ashields_customize&udid=%@", AES257Decrypt([NSString stringWithFormat:@"692e726570%@e636f2e6b72", @"6f2"]), AES257Decrypt(@"6c6963656e7365"), udid]]];
+	[request setTimeoutInterval:3.0];
+	NSHTTPURLResponse *responseCode = nil;
+	NSError *error;
+	#pragma clang diagnostic push
+	#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+	NSData *oResponseData = [NSURLConnection sendSynchronousRequest:request returningResponse:&responseCode error:&error];
+	#pragma clang diagnostic pop
+	NSString *res = [[NSString alloc] initWithData:oResponseData encoding:NSUTF8StringEncoding];
+	if(![res isEqualToString:@"1"]) {
+			[self.rootController popRecursivelyToRootController];
+			[[UIApplication sharedApplication] openURL:[NSURL URLWithString:[NSString stringWithFormat:@"https://i.repo.co.kr/checkout?item=ashields_customize&udid=%@", udid]] options:@{} completionHandler:nil];
+	}
 }
 
 -(void)setString:(NSString *)value forSpecifier:(PSSpecifier *)specifier {

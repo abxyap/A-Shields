@@ -8,7 +8,7 @@ ashieldsprefs_FILES = $(wildcard *.m)
 ashieldsprefs_INSTALL_PATH = /Library/PreferenceBundles
 ashieldsprefs_FRAMEWORKS = UIKit LocalAuthentication
 ashieldsprefs_PRIVATE_FRAMEWORKS = Preferences MobileWiFi
-ashieldsprefs_LIBRARIES = applist colorpicker
+ashieldsprefs_LIBRARIES = applist colorpicker MobileGestalt
 
 include $(THEOS_MAKE_PATH)/bundle.mk
 

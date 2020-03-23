@@ -4,6 +4,12 @@
 
 @interface PSListController (Private)
 -(void)_returnKeyPressed:(id)arg1;
+-(void)popRecursivelyToRootController;
+-(void)viewWillAppear;
+-(void)viewDidAppear;
+@end
+@interface PSViewController (Private2)
+-(void)popRecursivelyToRootController;
 @end
 
 @interface PSTextFieldSpecifier : PSSpecifier

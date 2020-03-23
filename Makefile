@@ -11,8 +11,8 @@ AShields_LIBRARIES = Rocketbootstrap colorpicker
 
 include $(THEOS_MAKE_PATH)/tweak.mk
 
-after-install::
-	install.exec "killall -9 SpringBoard"
+# after-install::
+# 	install.exec "killall -9 SpringBoard"
 SUBPROJECTS += ashieldsprefs
 # SUBPROJECTS += ashieldsappsupport
 include $(THEOS_MAKE_PATH)/aggregate.mk
