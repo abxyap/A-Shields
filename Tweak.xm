@@ -65,6 +65,7 @@ NSString *getType() {
 %hook SBIconView
 %property (nonatomic, retain) UIImageView *lockImageView;
 -(void)_updateLabel {
+	%orig;
 	SBIcon *icon = self.icon;
 	SBApplication *app = [icon application];
 	NSString *bundleID = [app bundleIdentifier];
@@ -86,7 +87,6 @@ NSString *getType() {
 		[self.lockImageView removeFromSuperview];
 		self.lockImageView = nil;
 	}
-	%orig;
 }
 %end
 
