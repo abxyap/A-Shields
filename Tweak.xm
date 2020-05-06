@@ -95,16 +95,18 @@ NSString *getType() {
 	NSLog(@"[AShields] trans %@", trans);
 	if([[[trans transitionRequest] eventLabel] isEqualToString:@"ActivateSwitcherNoninteractive"]) return %orig;
 	if (([trans isKindOfClass:objc_getClass("SBAppToAppWorkspaceTransaction")] || [trans isKindOfClass:objc_getClass("SBCoverSheetToAppsWorkspaceTransaction")]) && ![trans isKindOfClass:objc_getClass("SBRotateScenesWorkspaceTransaction")]) {
-		HBLogDebug(@"class check ok");
 		NSArray *activatingApplications = [[(SBToAppsWorkspaceTransaction *)trans toApplicationSceneEntities] allObjects];
-		HBLogDebug(@"activatingApplications %@", activatingApplications);
 		if (activatingApplications.count == 0) return %orig;
 		SBApplication *app = [activatingApplications[0] application];
 		NSString *bundle = [app bundleIdentifier];
 		NSString *name = [app displayName];
 		if(![prefs[@"app"][bundle] isEqual:@1]) return %orig;
 		[[ASViewController sharedInstance] verifyTouchID:[NSString stringWithFormat:@"%@ for %@", getType(), name] reply:^(BOOL success) {
+			@try {
 				if(success) %orig;
+			} @catch(NSException *e) {
+
+			}
 		}];
 	} else return %orig;
 }

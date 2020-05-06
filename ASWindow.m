@@ -10,6 +10,8 @@
 @interface UIApplication (iOS13)
 -(NSSet *)connectedScenes;
 @end
+@interface ASAlertController : UIAlertController
+@end
 
 @implementation ASWindow
 
@@ -38,9 +40,7 @@
 
 -(UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event {
   UIView *hitTestResult = [super hitTest:point withEvent:event];
-  if (self.touchInjection == false) {
-    return nil;
-  }
+  if (self.touchInjection == false && ![hitTestResult isKindOfClass:[ASAlertController class]]) return nil;
   return hitTestResult;
 }
 

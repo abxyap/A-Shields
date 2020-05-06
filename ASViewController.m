@@ -32,6 +32,14 @@ NSString *getType() {
 	} else return typeCache;
 }
 
+
+@interface ASAlertController : UIAlertController
+@end
+
+@implementation ASAlertController
+@end
+
+
 @implementation ASViewController
 
 + (instancetype)sharedInstance {
@@ -70,7 +78,7 @@ void loadPrefs() {
 			if([authError code] == -8) msg = [NSString stringWithFormat:@"%@ is locked because there were too many failed attempts.\nA-Shields will deny all authentication until %@ is available again.", getType(), getType()];
 			else if([authError code] == -7) msg = [NSString stringWithFormat:@"%@ is not available.\nGo to Settings to activate %@.\nA-Shields will not work until you activate %@.", getType(), getType(), getType()];
 			else msg = @"This device does not support biometric authentication.\nPlease upgrade to iPhone 5s or later to use A-Shields.";
-			self.alert = [UIAlertController alertControllerWithTitle:alertTitle message:msg preferredStyle:UIAlertControllerStyleAlert];
+			self.alert = [ASAlertController alertControllerWithTitle:alertTitle message:msg preferredStyle:UIAlertControllerStyleAlert];
 			[self.alert addAction:[UIAlertAction actionWithTitle:@"Okay" style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
 				[[ASWindow sharedInstance] setTouchInjection:false];
 				callback([authError code] != -8);
@@ -130,7 +138,7 @@ void loadPrefs() {
 		[[ASScanner sharedInstance] startMonitoring];
 		[[ASWindow sharedInstance] setTouchInjection:true];
 
-		self.alert = [UIAlertController alertControllerWithTitle:[NSString stringWithFormat:@"\n\n%@", alertTitle] message:[NSString stringWithFormat:prefs[@"customize"][@"lockedMessage"] ?: @"This device is protected by A-Shields\nUse %@ to continue.", getType()] preferredStyle:UIAlertControllerStyleAlert];
+		self.alert = [ASAlertController alertControllerWithTitle:[NSString stringWithFormat:@"\n\n%@", alertTitle] message:[NSString stringWithFormat:prefs[@"customize"][@"lockedMessage"] ?: @"This device is protected by A-Shields\nUse %@ to continue.", getType()] preferredStyle:UIAlertControllerStyleAlert];
 		if ([[ASWindow sharedInstance] respondsToSelector:@selector(_setSecure:)]) [[ASWindow sharedInstance] _setSecure:YES];
 
 		fingerglyph = [[objc_getClass("PKGlyphView") alloc] initWithStyle:0];
@@ -152,7 +160,7 @@ void loadPrefs() {
 			if(prefs[@"passcode"]) [self.alert addAction:[UIAlertAction actionWithTitle:@"Use Passcode" style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
 			[[ASScanner sharedInstance] stopMonitoring];
 
-			self.alert = [UIAlertController alertControllerWithTitle:alertTitle message:prefs[@"customize"][@"lockedMessage"] ?: @"This device is protected by A-Shields\nEnter passcode to continue." preferredStyle:UIAlertControllerStyleAlert];
+			self.alert = [ASAlertController alertControllerWithTitle:alertTitle message:prefs[@"customize"][@"lockedMessage"] ?: @"This device is protected by A-Shields\nEnter passcode to continue." preferredStyle:UIAlertControllerStyleAlert];
 
 			[self.alert addTextFieldWithConfigurationHandler:^(UITextField *textField) {
 				textField.placeholder = @"Passcode";
@@ -172,7 +180,7 @@ void loadPrefs() {
 					callback(true);
 					AudioServicesPlaySystemSound(1519);
 				} else {
-						self.alert = [UIAlertController alertControllerWithTitle:alertTitle message:prefs[@"customize"][@"authFailMessage"] ?: @"Authentication failed. Please try again." preferredStyle:UIAlertControllerStyleAlert];
+						self.alert = [ASAlertController alertControllerWithTitle:alertTitle message:prefs[@"customize"][@"authFailMessage"] ?: @"Authentication failed. Please try again." preferredStyle:UIAlertControllerStyleAlert];
 						[self.alert addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
 							[[ASWindow sharedInstance] setTouchInjection:false];
 							callback(false);
@@ -185,7 +193,7 @@ void loadPrefs() {
 		[self presentViewController:self.alert animated:YES completion:nil];
 	} @catch(NSException *ex) {
 		[[ASWindow sharedInstance] setTouchInjection:true];
-		self.alert = [UIAlertController alertControllerWithTitle:alertTitle message:[NSString stringWithFormat:@"Oops! A-Shields has crashed. Please try again later.\n\n%@", ex.reason] preferredStyle:UIAlertControllerStyleAlert];
+		self.alert = [ASAlertController alertControllerWithTitle:alertTitle message:[NSString stringWithFormat:@"Oops! A-Shields has crashed. Please try again later.\n\n%@", ex.reason] preferredStyle:UIAlertControllerStyleAlert];
 		[self.alert addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
 			[[ASWindow sharedInstance] setTouchInjection:false];
 			callback(false);
