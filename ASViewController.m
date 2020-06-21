@@ -37,10 +37,19 @@ NSString *getType() {
 @end
 
 @implementation ASAlertController
+
+-(BOOL)_canShowWhileLocked {
+	return true;
+}
+
 @end
 
 
 @implementation ASViewController
+
+-(BOOL)_canShowWhileLocked {
+	return true;
+}
 
 + (instancetype)sharedInstance {
   static dispatch_once_t p = 0;
