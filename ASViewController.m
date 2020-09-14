@@ -106,12 +106,14 @@ void loadPrefs() {
 				if(![prefs[@"disablehaptic"] isEqual:@1]) AudioServicesPlaySystemSound(1519);
 			} else {
 				[self.alert setMessage:prefs[@"customize"][@"authFailMessage"] ?: @"Authentication failed. Please try again."];
+				if([getType() isEqualToString:@"Face ID"]) {
+					[self.alert addAction:[UIAlertAction actionWithTitle:@"Retry Face ID" style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
+						[[ASWindow sharedInstance] setTouchInjection:false];
+						[[ASScanner sharedInstance] stopMonitoring];
+						[self verifyTouchID:alertTitle reply:callback];
+					}]];
+				}
 				if(![prefs[@"disablehaptic"] isEqual:@1]) AudioServicesPlaySystemSound(1521);
-				// if([getType() isEqualToString:@"Face ID"]) {
-				// 	[self.alert addAction:[UIAlertAction actionWithTitle:@"Retry Face ID" style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
-				//		// TODO: Retry Face ID
-				// 	}]];
-				// }
 			}
 		}];
 		[[ASScanner sharedInstance] setEventAlert:^(int event) {
@@ -163,9 +165,9 @@ void loadPrefs() {
 
 		[self.alert addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
 			[[ASScanner sharedInstance] stopMonitoring];
-				[[ASWindow sharedInstance] setTouchInjection:false];
-					callback(false);
-				}]];
+			[[ASWindow sharedInstance] setTouchInjection:false];
+				callback(false);
+			}]];
 			if(prefs[@"passcode"]) [self.alert addAction:[UIAlertAction actionWithTitle:@"Use Passcode" style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
 			[[ASScanner sharedInstance] stopMonitoring];
 
