@@ -28,9 +28,11 @@
 @end
 @interface SBWorkspaceTransitionRequest :NSObject
 @property (nonatomic,copy) NSString * eventLabel;
+-(NSSet *)toApplicationSceneEntities;
 @end
 @interface SBWorkspaceTransaction : NSObject
 @property (nonatomic,readonly) SBWorkspaceTransitionRequest * transitionRequest;
+-(BOOL)isComplete;
 @end
 @interface SBToAppsWorkspaceTransaction
 @property (nonatomic,readonly) NSSet * toApplicationSceneEntities;
@@ -95,8 +97,15 @@
 @property (retain) SFSearchResult * result;
 @end
 
+@interface SBMainSwitcherViewController
++(instancetype)sharedInstance;
+-(BOOL)isMainSwitcherVisible;
+@end
+
 @interface SpringBoard
++(instancetype)sharedApplication;
 -(SBApplication *)_accessibilityFrontMostApplication;
+-(void)_simulateHomeButtonPress;
 @end
 @interface LAContext (AShields)
 @property (assign,nonatomic) long long biometryType;

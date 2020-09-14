@@ -56,8 +56,8 @@ NSString *getType() {
 -(void)lockUIFromSource:(int)arg1 withOptions:(id)arg2 {
 	%orig;
 	[[ASScanner sharedInstance] stopMonitoring];
-  [[ASViewController sharedInstance] setSession:false];
-  [[ASViewController sharedInstance] closeAlert];
+	[[ASViewController sharedInstance] setSession:false];
+	[[ASViewController sharedInstance] closeAlert];
 	[[ASWindow sharedInstance] setTouchInjection:false];
 }
 %end
@@ -90,20 +90,39 @@ NSString *getType() {
 }
 %end
 
+%hook SBFluidSwitcherGestureWorkspaceTransaction
+-(void)_didComplete {
+	%orig;
+	if([[objc_getClass("SBMainSwitcherViewController") sharedInstance] isMainSwitcherVisible]) return;
+	SBApplication *app = [[objc_getClass("SpringBoard") sharedApplication] _accessibilityFrontMostApplication];
+	NSString *bundle = [app bundleIdentifier];
+	NSString *name = [app displayName];
+	if(![prefs[@"app"][bundle] isEqual:@1]) return %orig;
+	[[ASViewController sharedInstance] verifyTouchID:[NSString stringWithFormat:@"%@ for %@", getType(), name] reply:^(BOOL success) {
+		if(!success) [[objc_getClass("SpringBoard") sharedApplication] _simulateHomeButtonPress];
+	}];
+}
+%end
+
+
 %hook SBMainWorkspace
 - (void)setCurrentTransaction:(SBWorkspaceTransaction *)trans {
-	NSLog(@"[AShields] trans %@", trans);
+	HBLogError(@"[AShields] trans %@", trans);
 	if([[[trans transitionRequest] eventLabel] isEqualToString:@"ActivateSwitcherNoninteractive"]) return %orig;
 	if (([trans isKindOfClass:objc_getClass("SBAppToAppWorkspaceTransaction")] || [trans isKindOfClass:objc_getClass("SBCoverSheetToAppsWorkspaceTransaction")]) && ![trans isKindOfClass:objc_getClass("SBRotateScenesWorkspaceTransaction")]) {
-		NSArray *activatingApplications = [[(SBToAppsWorkspaceTransaction *)trans toApplicationSceneEntities] allObjects];
+		NSArray *activatingApplications = [[[trans transitionRequest] toApplicationSceneEntities] allObjects];
 		if (activatingApplications.count == 0) return %orig;
+		HBLogError(@"[AShields] activatingApplications %@", activatingApplications);
 		SBApplication *app = [activatingApplications[0] application];
 		NSString *bundle = [app bundleIdentifier];
 		NSString *name = [app displayName];
 		if(![prefs[@"app"][bundle] isEqual:@1]) return %orig;
 		[[ASViewController sharedInstance] verifyTouchID:[NSString stringWithFormat:@"%@ for %@", getType(), name] reply:^(BOOL success) {
 			@try {
-				if(success) %orig;
+				if(success && ![trans isComplete]) %orig;
+				else if([trans isComplete]) {
+					NSLog(@"[AShields] Already completed.");
+				}
 			} @catch(NSException *e) {
 
 			}
@@ -145,11 +164,17 @@ NSString *getType() {
     else if([controller isKindOfClass:[%c(CCUIConnectivityAirDropViewController) class]]) connectivityType = @"airdrop";
   }
   if(![prefs[@"cc"][connectivityType] isEqual:@1]) return %orig;
-  [[ASViewController sharedInstance] verifyTouchID:[NSString stringWithFormat:@"%@ for %@", getType(), view.title] reply:^(BOOL success) {
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-      if(success) %orig;
-    });
-  }];
+  if([view respondsToSelector:@selector(title)]) {
+	  [[ASViewController sharedInstance] verifyTouchID:[NSString stringWithFormat:@"%@ for %@", getType(), view.title] reply:^(BOOL success) {
+	    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+	      if(success) %orig;
+	    });
+	  }];
+	} else {
+	  [[ASViewController sharedInstance] verifyTouchID:[NSString stringWithFormat:@"%@", getType()] reply:^(BOOL success) {
+	      if(success) %orig;
+	  }];
+	}
 }
 %end
 

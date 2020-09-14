@@ -70,6 +70,11 @@ NSMutableDictionary *prefs;
 			[specifier.properties setValue:@"badge" forKey:@"displayIdentifier"];
 			specifier;
 		})];
+		[specifiers addObject:({
+			PSSpecifier *specifier = [PSSpecifier preferenceSpecifierNamed:@"Disable Haptic when succeed." target:self set:@selector(setSwitch:forSpecifier:) get:@selector(getSwitch:) detail:nil cell:PSSwitchCell edit:nil];
+			[specifier.properties setValue:@"disablehaptic" forKey:@"displayIdentifier"];
+			specifier;
+		})];
 		[specifiers addObject:[PSSpecifier preferenceSpecifierNamed:@"Customize" target:nil set:nil get:nil detail:[ASPCustomizeController class] cell:PSLinkListCell edit:nil]];
 		[specifiers addObject:[PSSpecifier preferenceSpecifierNamed:@"Trusted WiFi Networks" target:nil set:nil get:nil detail:[ASPWiFiNetworksController class] cell:PSLinkListCell edit:nil]];
 

@@ -65,12 +65,12 @@ void loadPrefs() {
 }
 
 -(id)init {
-  CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, (CFNotificationCallback)loadPrefs, CFSTR("com.rpgfarm.ashields/settingsupdate"), NULL, CFNotificationSuspensionBehaviorCoalesce);
+	CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, (CFNotificationCallback)loadPrefs, CFSTR("com.rpgfarm.ashields/settingsupdate"), NULL, CFNotificationSuspensionBehaviorCoalesce);
 	loadPrefs();
-  [self.view setBackgroundColor:[UIColor clearColor]];
-  dlopen("/System/Library/PrivateFrameworks/SpringBoardUIServices.framework/SpringBoardUIServices", RTLD_NOW);
-  dlopen("/System/Library/PrivateFrameworks/PassKitUIFoundation.framework/PassKitUIFoundation", RTLD_NOW);
-  return self;
+	[self.view setBackgroundColor:[UIColor clearColor]];
+	dlopen("/System/Library/PrivateFrameworks/SpringBoardUIServices.framework/SpringBoardUIServices", RTLD_NOW);
+	dlopen("/System/Library/PrivateFrameworks/PassKitUIFoundation.framework/PassKitUIFoundation", RTLD_NOW);
+	return self;
 }
 
 -(void)closeAlert {
@@ -103,10 +103,10 @@ void loadPrefs() {
 			[self.alert dismissViewControllerAnimated:YES completion:nil];
 				[[ASWindow sharedInstance] setTouchInjection:false];
 				callback(true);
-				AudioServicesPlaySystemSound(1519);
+				if(![prefs[@"disablehaptic"] isEqual:@1]) AudioServicesPlaySystemSound(1519);
 			} else {
 				[self.alert setMessage:prefs[@"customize"][@"authFailMessage"] ?: @"Authentication failed. Please try again."];
-				AudioServicesPlaySystemSound(1521);
+				if(![prefs[@"disablehaptic"] isEqual:@1]) AudioServicesPlaySystemSound(1521);
 				// if([getType() isEqualToString:@"Face ID"]) {
 				// 	[self.alert addAction:[UIAlertAction actionWithTitle:@"Retry Face ID" style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
 				//		// TODO: Retry Face ID
@@ -187,7 +187,7 @@ void loadPrefs() {
 					[self.alert dismissViewControllerAnimated:YES completion:nil];
 					[[ASWindow sharedInstance] setTouchInjection:false];
 					callback(true);
-					AudioServicesPlaySystemSound(1519);
+					if(![prefs[@"disablehaptic"] isEqual:@1]) AudioServicesPlaySystemSound(1521);
 				} else {
 						self.alert = [ASAlertController alertControllerWithTitle:alertTitle message:prefs[@"customize"][@"authFailMessage"] ?: @"Authentication failed. Please try again." preferredStyle:UIAlertControllerStyleAlert];
 						[self.alert addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
