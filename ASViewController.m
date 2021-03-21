@@ -145,6 +145,12 @@ void loadPrefs() {
 						shakeanimation.toValue = [NSValue valueWithCGPoint:CGPointMake(fingerglyph.center.x + 10, fingerglyph.center.y)];
 						[fingerglyph.layer addAnimation:shakeanimation forKey:@"position"];
 					}
+					if(event == 6 && prefs[@"passcode"]) {
+						[[ASScanner sharedInstance] stopMonitoring];
+						[self.alert dismissViewControllerAnimated:YES completion:^() {
+							[self launchPasscodeAuth:alertTitle reply:callback message:@"Mask has been detected.\nEnter passcode to continue."];
+						}];
+					}
 				}
 		}];
 		[[ASScanner sharedInstance] startMonitoring];
@@ -170,37 +176,8 @@ void loadPrefs() {
 			callback(false);
 		}]];
 		if(prefs[@"passcode"]) [self.alert addAction:[UIAlertAction actionWithTitle:@"Use Passcode" style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
-		[[ASScanner sharedInstance] stopMonitoring];
-
-		self.alert = [ASAlertController alertControllerWithTitle:alertTitle message:prefs[@"customize"][@"lockedMessage"] ?: @"This device is protected by A-Shields\nEnter passcode to continue." preferredStyle:UIAlertControllerStyleAlert];
-
-		[self.alert addTextFieldWithConfigurationHandler:^(UITextField *textField) {
-			textField.placeholder = @"Passcode";
-			textField.secureTextEntry = true;
-			textField.keyboardType = UIKeyboardTypeNumberPad;
-			textField.delegate = [ASViewController sharedInstance];
-		}];
-		[self.alert addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
-			[[ASWindow sharedInstance] setTouchInjection:false];
-			callback(false);
-		}]];
-		[self.alert addAction:[UIAlertAction actionWithTitle:@"Continue" style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
-			if([self.alert.textFields.firstObject.text isEqualToString:prefs[@"passcode"]]) {
-				if([prefs[@"session"] isEqual:@1]) self.session = true;
-				[self.alert dismissViewControllerAnimated:YES completion:nil];
-				[[ASWindow sharedInstance] setTouchInjection:false];
-				callback(true);
-				if(![prefs[@"disablehaptic"] isEqual:@1]) AudioServicesPlaySystemSound(1521);
-			} else {
-					self.alert = [ASAlertController alertControllerWithTitle:alertTitle message:prefs[@"customize"][@"authFailMessage"] ?: @"Authentication failed. Please try again." preferredStyle:UIAlertControllerStyleAlert];
-					[self.alert addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
-						[[ASWindow sharedInstance] setTouchInjection:false];
-						callback(false);
-					}]];
-					[self presentViewController:self.alert animated:YES completion:nil];
-				}
-			}]];
-			[self presentViewController:self.alert animated:YES completion:nil];
+			[[ASScanner sharedInstance] stopMonitoring];
+			[self launchPasscodeAuth:alertTitle reply:callback message:nil];
 		}]];
 		[self presentViewController:self.alert animated:YES completion:nil];
 	} @catch(NSException *ex) {
@@ -212,6 +189,40 @@ void loadPrefs() {
 		}]];
 		[self presentViewController:self.alert animated:YES completion:nil];
 	}
+}
+
+-(void)launchPasscodeAuth:(NSString *)alertTitle reply:(void (^)(BOOL))callback message:(NSString *)msg {
+	self.alert = [ASAlertController alertControllerWithTitle:alertTitle message:msg ? msg : (prefs[@"customize"][@"lockedMessage"] ?: @"This device is protected by A-Shields\nEnter passcode to continue.") preferredStyle:UIAlertControllerStyleAlert];
+
+	[self.alert addTextFieldWithConfigurationHandler:^(UITextField *textField) {
+		textField.placeholder = @"Passcode";
+		textField.secureTextEntry = true;
+		textField.keyboardType = UIKeyboardTypeNumberPad;
+		textField.delegate = [ASViewController sharedInstance];
+	}];
+	[self.alert addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
+		[[ASWindow sharedInstance] setTouchInjection:false];
+		callback(false);
+	}]];
+	[self.alert addAction:[UIAlertAction actionWithTitle:@"Continue" style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
+		if([self.alert.textFields.firstObject.text isEqualToString:prefs[@"passcode"]]) {
+			if([prefs[@"session"] isEqual:@1]) self.session = true;
+			[self.alert dismissViewControllerAnimated:YES completion:nil];
+			[[ASWindow sharedInstance] setTouchInjection:false];
+			callback(true);
+			CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.rpgfarm.ashields/ashieldsunlocked"), NULL, NULL, true);
+			if(![prefs[@"disablehaptic"] isEqual:@1]) AudioServicesPlaySystemSound(1521);
+		} else {
+			self.alert = [ASAlertController alertControllerWithTitle:alertTitle message:prefs[@"customize"][@"authFailMessage"] ?: @"Authentication failed. Please try again." preferredStyle:UIAlertControllerStyleAlert];
+			[self.alert addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
+				[[ASWindow sharedInstance] setTouchInjection:false];
+				callback(false);
+			}]];
+			[self presentViewController:self.alert animated:YES completion:nil];
+		}
+	}]];
+
+	[self presentViewController:self.alert animated:YES completion:nil];
 }
 
 @end

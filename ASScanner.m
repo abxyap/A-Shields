@@ -20,7 +20,7 @@ BOOL FaceID = false;
 	switch (arg3) {
 		case TouchIDFingerDown: {
 			HBLogDebug(@"Finger down");
-     		self.eventAlert(1);
+     	self.eventAlert(1);
 			break;
 		}
 		case TouchIDFingerUp: {
@@ -38,10 +38,10 @@ BOOL FaceID = false;
 			break;
 		case TouchIDMatched:
 			HBLogDebug(@"Finger matched");
-   		 	self.eventAlert(4);
-    		self.callback(TRUE);
+ 		 	self.eventAlert(4);
+  		self.callback(TRUE);
 			if(FaceID) [self stopMonitoring];
-     		success = true;
+     	success = true;
 			break;
 		case TouchIDNotMatched: {
 			HBLogDebug(@"Authentication failed");
@@ -59,7 +59,14 @@ BOOL FaceID = false;
 		case 13: {
 			FaceID = true;
 			HBLogDebug(@"Finger down");
-     		self.eventAlert(1);
+     	self.eventAlert(1);
+			break;
+		}
+
+		case 28: {
+			FaceID = true;
+			HBLogDebug(@"Mask Detected");
+     	self.eventAlert(6);
 			break;
 		}
 	}
