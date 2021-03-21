@@ -12,7 +12,11 @@ NSMutableDictionary *prefs;
 	if (!_specifiers) {
 		[self getPreference];
 		NSMutableArray *specifiers = [[NSMutableArray alloc] init];
-		[specifiers addObject:[PSSpecifier preferenceSpecifierNamed:@"If you connect to the selected WiFi network, A-Shields will stop working." target:self set:nil get:nil detail:nil cell:PSGroupCell edit:nil]];
+		[specifiers addObject:({
+			PSSpecifier *specifier = [PSSpecifier preferenceSpecifierNamed:@"" target:self set:nil get:nil detail:nil cell:PSGroupCell edit:nil];
+			[specifier.properties setValue:@"If you connect to the selected WiFi network, A-Shields will stop working" forKey:@"footerText"];	
+			specifier;
+		})];
 		[specifiers addObject:[PSSpecifier preferenceSpecifierNamed:@"Trusted WiFi Networks" target:self set:nil get:nil detail:nil cell:PSGroupCell edit:nil]];
 
 

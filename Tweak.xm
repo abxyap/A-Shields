@@ -35,18 +35,18 @@ NSString *getType() {
 - (void)applicationDidFinishLaunching:(id)application {
 	%orig;
   [ASWindow sharedInstance];
-	CPDistributedMessagingCenter *_messagingCenter = [CPDistributedMessagingCenter centerNamed:@"com.rpgfarm.a-shields"];
-	rocketbootstrap_distributedmessagingcenter_apply(_messagingCenter);
-	[_messagingCenter runServerOnCurrentThread];
-	[_messagingCenter registerForMessageName:@"verifyTouchID" target:self selector:@selector(handleAShieldsVerify:withUserInfo:)];
+
+	CPDistributedMessagingCenter * c = [CPDistributedMessagingCenter centerNamed:@"com.rpgfarm.a-shields"];
+  	rocketbootstrap_distributedmessagingcenter_apply(c);
+	[c runServerOnCurrentThread];
+	[c registerForMessageName:@"handleAShieldsVerify" target:self selector:@selector(handleAShieldsVerify:withUserInfo:)];
+
 }
 
 %new
 -(void)handleAShieldsVerify:(NSString *)name withUserInfo:(NSDictionary *)userInfo {
 	[[ASViewController sharedInstance] verifyTouchID:userInfo[@"title"] reply:^(BOOL success){
-		[[objc_getClass("NSDistributedNotificationCenter") defaultCenter] postNotificationName:[NSString stringWithFormat:@"com.rpgfarm.a-shields-app-support.%@", userInfo[@"bundle"]] object:nil userInfo:@{
-			@"success": [NSNumber numberWithBool:success]
-		}];
+		[[%c(NSDistributedNotificationCenter) defaultCenter] postNotificationName:[NSString stringWithFormat:@"com.rpgfarm.a-shields.%@.verify", userInfo[@"bundleID"]] object:nil userInfo:@{ @"success": success ? @1 : @0 }];
 	}];
 }
 %end
@@ -107,12 +107,12 @@ NSString *getType() {
 
 %hook SBMainWorkspace
 - (void)setCurrentTransaction:(SBWorkspaceTransaction *)trans {
-	HBLogError(@"[AShields] trans %@", trans);
+	// HBLogError(@"[AShields] trans %@", trans);
 	if([[[trans transitionRequest] eventLabel] isEqualToString:@"ActivateSwitcherNoninteractive"]) return %orig;
 	if (([trans isKindOfClass:objc_getClass("SBAppToAppWorkspaceTransaction")] || [trans isKindOfClass:objc_getClass("SBCoverSheetToAppsWorkspaceTransaction")]) && ![trans isKindOfClass:objc_getClass("SBRotateScenesWorkspaceTransaction")]) {
 		NSArray *activatingApplications = [[[trans transitionRequest] toApplicationSceneEntities] allObjects];
 		if (activatingApplications.count == 0) return %orig;
-		HBLogError(@"[AShields] activatingApplications %@", activatingApplications);
+		// HBLogError(@"[AShields] activatingApplications %@", activatingApplications);
 		SBApplication *app = [activatingApplications[0] application];
 		NSString *bundle = [app bundleIdentifier];
 		NSString *name = [app displayName];
@@ -121,7 +121,7 @@ NSString *getType() {
 			@try {
 				if(success && ![trans isComplete]) %orig;
 				else if([trans isComplete]) {
-					NSLog(@"[AShields] Already completed.");
+					// NSLog(@"[AShields] Already completed.");
 				}
 			} @catch(NSException *e) {
 

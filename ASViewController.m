@@ -166,40 +166,40 @@ void loadPrefs() {
 		[self.alert addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
 			[[ASScanner sharedInstance] stopMonitoring];
 			[[ASWindow sharedInstance] setTouchInjection:false];
-				callback(false);
-			}]];
-			if(prefs[@"passcode"]) [self.alert addAction:[UIAlertAction actionWithTitle:@"Use Passcode" style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
-			[[ASScanner sharedInstance] stopMonitoring];
+			callback(false);
+		}]];
+		if(prefs[@"passcode"]) [self.alert addAction:[UIAlertAction actionWithTitle:@"Use Passcode" style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
+		[[ASScanner sharedInstance] stopMonitoring];
 
-			self.alert = [ASAlertController alertControllerWithTitle:alertTitle message:prefs[@"customize"][@"lockedMessage"] ?: @"This device is protected by A-Shields\nEnter passcode to continue." preferredStyle:UIAlertControllerStyleAlert];
+		self.alert = [ASAlertController alertControllerWithTitle:alertTitle message:prefs[@"customize"][@"lockedMessage"] ?: @"This device is protected by A-Shields\nEnter passcode to continue." preferredStyle:UIAlertControllerStyleAlert];
 
-			[self.alert addTextFieldWithConfigurationHandler:^(UITextField *textField) {
-				textField.placeholder = @"Passcode";
-				textField.secureTextEntry = true;
-				textField.keyboardType = UIKeyboardTypeNumberPad;
-				textField.delegate = [ASViewController sharedInstance];
-			}];
-			[self.alert addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
+		[self.alert addTextFieldWithConfigurationHandler:^(UITextField *textField) {
+			textField.placeholder = @"Passcode";
+			textField.secureTextEntry = true;
+			textField.keyboardType = UIKeyboardTypeNumberPad;
+			textField.delegate = [ASViewController sharedInstance];
+		}];
+		[self.alert addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
+			[[ASWindow sharedInstance] setTouchInjection:false];
+			callback(false);
+		}]];
+		[self.alert addAction:[UIAlertAction actionWithTitle:@"Continue" style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
+			if([self.alert.textFields.firstObject.text isEqualToString:prefs[@"passcode"]]) {
+				if([prefs[@"session"] isEqual:@1]) self.session = true;
+				[self.alert dismissViewControllerAnimated:YES completion:nil];
 				[[ASWindow sharedInstance] setTouchInjection:false];
-				callback(false);
+				callback(true);
+				if(![prefs[@"disablehaptic"] isEqual:@1]) AudioServicesPlaySystemSound(1521);
+			} else {
+					self.alert = [ASAlertController alertControllerWithTitle:alertTitle message:prefs[@"customize"][@"authFailMessage"] ?: @"Authentication failed. Please try again." preferredStyle:UIAlertControllerStyleAlert];
+					[self.alert addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
+						[[ASWindow sharedInstance] setTouchInjection:false];
+						callback(false);
+					}]];
+					[self presentViewController:self.alert animated:YES completion:nil];
+				}
 			}]];
-			[self.alert addAction:[UIAlertAction actionWithTitle:@"Continue" style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
-				if([self.alert.textFields.firstObject.text isEqualToString:prefs[@"passcode"]]) {
-					if([prefs[@"session"] isEqual:@1]) self.session = true;
-					[self.alert dismissViewControllerAnimated:YES completion:nil];
-					[[ASWindow sharedInstance] setTouchInjection:false];
-					callback(true);
-					if(![prefs[@"disablehaptic"] isEqual:@1]) AudioServicesPlaySystemSound(1521);
-				} else {
-						self.alert = [ASAlertController alertControllerWithTitle:alertTitle message:prefs[@"customize"][@"authFailMessage"] ?: @"Authentication failed. Please try again." preferredStyle:UIAlertControllerStyleAlert];
-						[self.alert addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
-							[[ASWindow sharedInstance] setTouchInjection:false];
-							callback(false);
-						}]];
-						[self presentViewController:self.alert animated:YES completion:nil];
-					}
-				}]];
-				[self presentViewController:self.alert animated:YES completion:nil];
+			[self presentViewController:self.alert animated:YES completion:nil];
 		}]];
 		[self presentViewController:self.alert animated:YES completion:nil];
 	} @catch(NSException *ex) {
