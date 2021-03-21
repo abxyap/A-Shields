@@ -99,9 +99,10 @@ void loadPrefs() {
 		if(self.session) return callback(true);
 		[[ASScanner sharedInstance] setCallback:^(BOOL success) {
 			if(success) {
-			if([prefs[@"session"] isEqual:@1]) self.session = true;
-			[self.alert dismissViewControllerAnimated:YES completion:nil];
+				if([prefs[@"session"] isEqual:@1]) self.session = true;
+				[self.alert dismissViewControllerAnimated:YES completion:nil];
 				[[ASWindow sharedInstance] setTouchInjection:false];
+				CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.rpgfarm.ashields/ashieldsunlocked"), NULL, NULL, true);
 				callback(true);
 				if(![prefs[@"disablehaptic"] isEqual:@1]) AudioServicesPlaySystemSound(1519);
 			} else {

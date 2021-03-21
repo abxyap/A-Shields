@@ -61,16 +61,24 @@ NSString *getType() {
 	[[ASWindow sharedInstance] setTouchInjection:false];
 }
 %end
-
+NSMutableArray *lockedIcons;
 %hook SBIconView
 %property (nonatomic, retain) UIImageView *lockImageView;
+-(void)prepareForReuse {
+	if(self.lockImageView) {
+		[self.lockImageView removeFromSuperview];
+		self.lockImageView = nil;
+	}
+	[	lockedIcons removeObject:self];
+	%orig;
+}
 -(void)_updateLabel {
 	%orig;
 	SBIcon *icon = self.icon;
 	SBApplication *app = [icon application];
 	NSString *bundleID = [app bundleIdentifier];
 	if(bundleID == nil) return;
-	if([prefs[@"badge"] isEqual:@1] && ![[ASViewController sharedInstance] session] && !(prefs[@"wifi"] && [prefs[@"wifi"][[[objc_getClass("SBWiFiManager") sharedInstance] currentNetworkName]] isEqual:@1]) && [prefs[@"app"][bundleID] isEqual:@1]) {
+	if([prefs[@"badge"] isEqual:@1] && ![[ASViewController sharedInstance] session] && !(prefs[@"wifi"] && [prefs[@"wifi"][[[objc_getClass("SBWiFiManager") sharedInstance] currentNetworkName]] isEqual:@1]) && [prefs[@"app"][bundleID] isEqual:@1] && ![icon isFolderIcon]) {
 		[self setIconImageAlpha:0.3];
 		[self setIconAccessoryAlpha:0.3];
 		[self _applyIconImageAlpha:0.3];
@@ -83,10 +91,24 @@ NSString *getType() {
 			CGFloat width = self.frame.size.width;
 			self.lockImageView.frame = CGRectMake(width/2-width/4, width/2-width/4, width/2, width/2);
 		}
+		[lockedIcons addObject:self];
 	} else if(self.lockImageView) {
 		[self.lockImageView removeFromSuperview];
 		self.lockImageView = nil;
+		[lockedIcons removeObject:self];
 	}
+}
+%new
+-(void)ashieldsUnlock {
+	if(![[ASViewController sharedInstance] session]) return;
+	if(self.lockImageView) {
+		[self.lockImageView removeFromSuperview];
+		self.lockImageView = nil;
+	}
+	[self setIconImageAlpha:1];
+	[self setIconAccessoryAlpha:1];
+	[self _applyIconImageAlpha:1];
+	[lockedIcons removeObject:self];
 }
 %end
 
@@ -181,8 +203,16 @@ NSString *getType() {
 void loadPrefs() {
 	prefs = [[NSMutableDictionary alloc] initWithContentsOfFile:@"/var/mobile/Library/Preferences/com.rpgfarm.ashieldsprefs.plist"];
 }
+void ashieldsUnlocked() {
+	NSArray *arr = [lockedIcons copy];
+	for (SBIconView *icon in arr) {
+		[icon ashieldsUnlock];
+	}
+}
 
 %ctor {
   CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, (CFNotificationCallback)loadPrefs, CFSTR("com.rpgfarm.ashields/settingsupdate"), NULL, CFNotificationSuspensionBehaviorCoalesce);
+  CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, (CFNotificationCallback)ashieldsUnlocked, CFSTR("com.rpgfarm.ashields/ashieldsunlocked"), NULL, CFNotificationSuspensionBehaviorCoalesce);
   loadPrefs();
+  lockedIcons = [@[] mutableCopy];
 }

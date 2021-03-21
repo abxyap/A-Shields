@@ -59,6 +59,7 @@
 @interface SBIcon : NSObject
 - (SBApplication *)application;
 - (id)applicationBundleID;
+-(BOOL)isFolderIcon;
 @end
 @interface SBIconImageView : UIView
 @property (nonatomic,readonly) SBIcon * icon;
@@ -70,6 +71,7 @@
 -(void)setIconAccessoryAlpha:(double)arg1;
 -(void)_applyIconImageAlpha:(double)arg1;
 -(SBIconImageView *)_iconImageView;
+-(void)ashieldsUnlock;
 @end
 @interface SBUIIconForceTouchViewController
 -(void)_presentAnimated:(BOOL)arg1 withCompletionHandler:(/*^block*/id)arg2 ;
