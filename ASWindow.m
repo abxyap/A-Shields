@@ -40,7 +40,7 @@
 
 -(UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event {
   UIView *hitTestResult = [super hitTest:point withEvent:event];
-  if (self.touchInjection == false && [[[ASViewController sharedInstance].view subviews] count] == 0) return nil;
+  if ([[self subviews] count] == 1) return nil;
   // if (self.touchInjection == false && ![hitTestResult isKindOfClass:[ASAlertController class]]) return nil;
   return hitTestResult;
 }

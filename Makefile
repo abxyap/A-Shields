@@ -14,5 +14,5 @@ include $(THEOS_MAKE_PATH)/tweak.mk
 after-install::
 	install.exec "killall -9 SpringBoard"
 SUBPROJECTS += ashieldsprefs
-SUBPROJECTS += ashieldsappsupport
+# SUBPROJECTS += ashieldsappsupport
 include $(THEOS_MAKE_PATH)/aggregate.mk
