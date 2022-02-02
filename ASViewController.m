@@ -65,6 +65,7 @@ void loadPrefs() {
 }
 
 -(id)init {
+	self = [super init];
 	CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, (CFNotificationCallback)loadPrefs, CFSTR("com.rpgfarm.ashields/settingsupdate"), NULL, CFNotificationSuspensionBehaviorCoalesce);
 	loadPrefs();
 	[self.view setBackgroundColor:[UIColor clearColor]];
@@ -79,6 +80,23 @@ void loadPrefs() {
 
 -(void)verifyTouchID:(NSString *)alertTitle reply:(void (^)(BOOL))callback {
 	@try {
+
+		if([prefs[@"disableBiometricAuthentication"] isEqual:@1] && prefs[@"passcode"]) {
+			[self launchPasscodeAuth:alertTitle reply:callback message:nil];
+			return;
+		}
+
+		NSString *lockedMessage = [NSString stringWithFormat:prefs[@"customize"][@"lockedMessage"] ?: @"This device is protected by A-Shields\nUse %@ to continue.", getType()];
+
+		if([prefs[@"useLAContext"] isEqual:@1]) {
+			[[[LAContext alloc] init] evaluatePolicy:LAPolicyDeviceOwnerAuthenticationWithBiometrics localizedReason:lockedMessage reply:^(BOOL success, NSError *error) {
+		    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+		      callback(success);
+		    });
+			}];
+			return;
+		}
+
 		NSError *authError = nil;
 		[[[LAContext alloc] init] canEvaluatePolicy:LAPolicyDeviceOwnerAuthenticationWithBiometrics error:&authError];
 		if(authError != nil) {
@@ -156,7 +174,7 @@ void loadPrefs() {
 		[[ASScanner sharedInstance] startMonitoring];
 		[[ASWindow sharedInstance] setTouchInjection:true];
 
-		self.alert = [ASAlertController alertControllerWithTitle:[NSString stringWithFormat:@"\n\n%@", alertTitle] message:[NSString stringWithFormat:prefs[@"customize"][@"lockedMessage"] ?: @"This device is protected by A-Shields\nUse %@ to continue.", getType()] preferredStyle:UIAlertControllerStyleAlert];
+		self.alert = [ASAlertController alertControllerWithTitle:[NSString stringWithFormat:@"\n\n%@", alertTitle] message:lockedMessage preferredStyle:UIAlertControllerStyleAlert];
 		if ([[ASWindow sharedInstance] respondsToSelector:@selector(_setSecure:)]) [[ASWindow sharedInstance] _setSecure:YES];
 
 		fingerglyph = [[objc_getClass("PKGlyphView") alloc] initWithStyle:0];

@@ -80,6 +80,11 @@ NSMutableDictionary *prefs;
 			[specifier.properties setValue:@"emulateLAPolicy" forKey:@"displayIdentifier"];
 			specifier;
 		})];
+		[specifiers addObject:({
+			PSSpecifier *specifier = [PSSpecifier preferenceSpecifierNamed:@"Use LAContext instead of A-Shields Prompt" target:self set:@selector(setSwitch:forSpecifier:) get:@selector(getSwitch:) detail:nil cell:PSSwitchCell edit:nil];
+			[specifier.properties setValue:@"useLAContext" forKey:@"displayIdentifier"];
+			specifier;
+		})];
 		[specifiers addObject:[PSSpecifier preferenceSpecifierNamed:@"Customize" target:nil set:nil get:nil detail:[ASPCustomizeController class] cell:PSLinkListCell edit:nil]];
 		[specifiers addObject:[PSSpecifier preferenceSpecifierNamed:@"Trusted WiFi Networks" target:nil set:nil get:nil detail:[ASPWiFiNetworksController class] cell:PSLinkListCell edit:nil]];
 
@@ -113,6 +118,11 @@ NSMutableDictionary *prefs;
 				[specifier.properties setValue:@"DevicePINPane" forKey:@"pane"];
 				[specifier.properties setValue:@"ASPPINController" forKey:@"customControllerClass"];
 				[specifier.properties setValue:@"PSButtonCell" forKey:@"cell"];
+				specifier;
+			})];
+			[specifiers addObject:({
+				PSSpecifier *specifier = [PSSpecifier preferenceSpecifierNamed:@"Disable Biometric Authentication" target:self set:@selector(setSwitch:forSpecifier:) get:@selector(getSwitch:) detail:nil cell:PSSwitchCell edit:nil];
+				[specifier.properties setValue:@"disableBiometricAuthentication" forKey:@"displayIdentifier"];
 				specifier;
 			})];
 		}
@@ -158,7 +168,11 @@ NSMutableDictionary *prefs;
 
 
 -(void)setSwitch:(NSNumber *)value forSpecifier:(PSSpecifier *)specifier {
-	prefs[[specifier propertyForKey:@"displayIdentifier"]] = [NSNumber numberWithBool:[value boolValue]];
+	NSString *identifier = [specifier propertyForKey:@"displayIdentifier"];
+	prefs[identifier] = [NSNumber numberWithBool:[value boolValue]];
+	if([identifier isEqualToString:@"useLAContext"] && [value isEqual:[NSNumber numberWithBool:true]]) {
+		prefs[@"emulateLAPolicy"] = [NSNumber numberWithBool:false];
+	}
 	[[prefs copy] writeToFile:PREFERENCE_IDENTIFIER atomically:FALSE];
 	CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.rpgfarm.ashields/settingsupdate"), NULL, NULL, true);
 }
