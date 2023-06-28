@@ -7,7 +7,6 @@ TWEAK_NAME = AShieldsAppSupport
 
 AShieldsAppSupport_FILES = Tweak.x
 AShieldsAppSupport_CFLAGS = -fobjc-arc
-AShieldsAppSupport_PRIVATE_FRAMEWORKS = AppSupport
-AShieldsAppSupport_LIBRARIES = Rocketbootstrap
+AShieldsAppSupport_LIBRARIES = mryipc
 
 include $(THEOS_MAKE_PATH)/tweak.mk

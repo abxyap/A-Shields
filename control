@@ -1,6 +1,6 @@
 Package: com.rpgfarm.a-shields
 Name: A-Shields
-Depends: mobilesubstrate, org.thebigboss.libcolorpicker (>=1.6.7), com.rpetrich.rocketbootstrap (>= 1.0.7~beta3)
+Depends: mobilesubstrate, ws.hbang.alderis (>= 1.2)
 Version: 1.6
 Architecture: iphoneos-arm
 Description: Protect your device

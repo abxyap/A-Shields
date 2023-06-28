@@ -6,8 +6,8 @@ include $(THEOS)/makefiles/common.mk
 TWEAK_NAME = AShields
 AShields_FILES = Tweak.xm ASScanner.m ASWindow.m ASViewController.m
 AShields_FRAMEWORKS = LocalAuthentication
-AShields_PRIVATE_FRAMEWORKS = SpringBoardUIServices Preferences AppSupport
-AShields_LIBRARIES = Rocketbootstrap colorpicker
+AShields_PRIVATE_FRAMEWORKS = SpringBoardUIServices Preferences
+AShields_LIBRARIES = mryipc colorpicker
 
 include $(THEOS_MAKE_PATH)/tweak.mk
 

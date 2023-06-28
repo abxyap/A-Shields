@@ -1,11 +1,35 @@
 #include "ASPApplicationSelectController.h"
 #import <spawn.h>
-#import <AppList/AppList.h>
 #define PREFERENCE_IDENTIFIER @"/var/mobile/Library/Preferences/com.rpgfarm.ashieldsprefs.plist"
 NSMutableDictionary *prefs;
 
-static NSInteger DictionaryTextComparator(id a, id b, void *context) {
-	return [[(__bridge NSDictionary *)context objectForKey:a] localizedCaseInsensitiveCompare:[(__bridge NSDictionary *)context objectForKey:b]];
+@interface LSApplicationProxy
+-(NSString *)bundleIdentifier;
+-(NSString *)localizedName;
+@end
+
+@interface LSApplicationWorkspace : NSObject
++(id)defaultWorkspace;
+-(id)allInstalledApplications;
+- (void)enumerateApplicationsOfType:(NSUInteger)type block:(void (^)(LSApplicationProxy*))block;
+@end
+
+@interface UIImage (Icon)
++(id)_applicationIconImageForBundleIdentifier:(id)arg1 format:(int)arg2 scale:(double)arg3;
+@end
+
+NSArray *getAllInstalledApplications() {
+	LSApplicationWorkspace *workspace = [LSApplicationWorkspace defaultWorkspace];
+	if(![workspace respondsToSelector:@selector(enumerateApplicationsOfType:block:)]) return [workspace allInstalledApplications];
+
+	NSMutableArray* installedApplications = [NSMutableArray new];
+	[workspace enumerateApplicationsOfType:0 block:^(LSApplicationProxy* appProxy) {
+		[installedApplications addObject:appProxy];
+	}];
+	[workspace enumerateApplicationsOfType:1 block:^(LSApplicationProxy* appProxy) {
+		[installedApplications addObject:appProxy];
+	}];
+	return installedApplications;
 }
 
 @implementation ASPApplicationSelectController
@@ -15,15 +39,15 @@ static NSInteger DictionaryTextComparator(id a, id b, void *context) {
 		[self getPreference];
 		NSMutableArray *specifiers = [[NSMutableArray alloc] init];
 		[specifiers addObject:[PSSpecifier preferenceSpecifierNamed:@"A-Shields Settings" target:self set:nil get:nil detail:nil cell:PSGroupCell edit:nil]];
-		ALApplicationList *applicationList = [ALApplicationList sharedApplicationList];
-		NSDictionary *applications = [[ALApplicationList sharedApplicationList] applicationsFilteredUsingPredicate:[NSPredicate predicateWithFormat:@"1=1"] onlyVisible:YES titleSortedIdentifiers:nil];
-		NSMutableArray *displayIdentifiers = [[applications allKeys] mutableCopy];
-		[displayIdentifiers sortUsingFunction:DictionaryTextComparator context:(__bridge void *)applications];
-		for (NSString *displayIdentifier in displayIdentifiers)
-		{
-			PSSpecifier *specifier = [PSSpecifier preferenceSpecifierNamed:applications[displayIdentifier] target:self set:@selector(setSwitch:forSpecifier:) get:@selector(getSwitch:) detail:nil cell:PSSwitchCell edit:nil];
-			[specifier.properties setValue:displayIdentifier forKey:@"displayIdentifier"];
-			UIImage *icon = [applicationList iconOfSize:ALApplicationIconSizeSmall forDisplayIdentifier:displayIdentifier];
+
+
+		NSArray *applications = getAllInstalledApplications();
+		NSArray *sortDescriptor = @[[NSSortDescriptor sortDescriptorWithKey:@"localizedName" ascending:YES selector:@selector(localizedCaseInsensitiveCompare:)]];
+		applications = [applications sortedArrayUsingDescriptors:sortDescriptor];
+		for (LSApplicationProxy *application in applications) {
+			UIImage* icon = [UIImage _applicationIconImageForBundleIdentifier:application.bundleIdentifier format:0 scale:[UIScreen mainScreen].scale];
+			PSSpecifier *specifier = [PSSpecifier preferenceSpecifierNamed:application.localizedName target:self set:@selector(setSwitch:forSpecifier:) get:@selector(getSwitch:) detail:nil cell:PSSwitchCell edit:nil];
+			[specifier.properties setValue:application.bundleIdentifier forKey:@"displayIdentifier"];
 			if (icon) [specifier setProperty:icon forKey:@"iconImage"];
 			[specifiers addObject:specifier];
 		}

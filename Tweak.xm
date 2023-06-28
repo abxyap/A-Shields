@@ -1,5 +1,4 @@
-#import <rocketbootstrap/rocketbootstrap.h>
-#import <AppSupport/CPDistributedMessagingCenter.h>
+#import <MRYIPCCenter.h>
 #import <LocalAuthentication/LocalAuthentication.h>
 #include <AudioToolbox/AudioToolbox.h>
 #import <Preferences/PSListController.h>
@@ -36,17 +35,14 @@ NSString *getType() {
 	%orig;
   [ASWindow sharedInstance];
 
-	CPDistributedMessagingCenter * c = [CPDistributedMessagingCenter centerNamed:@"com.rpgfarm.a-shields"];
-  	rocketbootstrap_distributedmessagingcenter_apply(c);
-	[c runServerOnCurrentThread];
-	[c registerForMessageName:@"handleAShieldsVerify" target:self selector:@selector(handleAShieldsVerify:withUserInfo:)];
-
+	MRYIPCCenter *center = [MRYIPCCenter centerNamed:@"com.rpgfarm.a-shields"];
+	[center addTarget:self action:@selector(handleAShieldsVerify:)];
 }
 
 %new
--(void)handleAShieldsVerify:(NSString *)name withUserInfo:(NSDictionary *)userInfo {
-	[[ASViewController sharedInstance] verifyTouchID:userInfo[@"title"] reply:^(BOOL success){
-		[[%c(NSDistributedNotificationCenter) defaultCenter] postNotificationName:[NSString stringWithFormat:@"com.rpgfarm.a-shields.%@.verify", userInfo[@"bundleID"]] object:nil userInfo:@{ @"success": success ? @1 : @0 }];
+-(void)handleAShieldsVerify:(NSDictionary *)args {
+	[[ASViewController sharedInstance] verifyTouchID:args[@"title"] reply:^(BOOL success){
+		[[%c(NSDistributedNotificationCenter) defaultCenter] postNotificationName:[NSString stringWithFormat:@"com.rpgfarm.a-shields.%@.verify", args[@"bundleID"]] object:nil userInfo:@{ @"success": success ? @1 : @0 }];
 	}];
 }
 %end
@@ -157,7 +153,8 @@ NSMutableArray *lockedIcons;
 @interface PSUIPrefsListController : UITableView
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath;
 @end
-@interface PSTableCell
+@import Preferences.PSTableCell;
+@interface PSTableCell (AShields)
 -(NSString *)title;
 @end
 

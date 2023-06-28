@@ -1,8 +1,7 @@
-#import <rocketbootstrap/rocketbootstrap.h>
-#import <AppSupport/CPDistributedMessagingCenter.h>
+#import <MRYIPCCenter.h>
 #import <LocalAuthentication/LocalAuthentication.h>
 
-static CPDistributedMessagingCenter *center;
+static MRYIPCCenter *center;
 typedef void (^myBlock) (BOOL success, NSError *error);
 myBlock savedReply;
 
@@ -13,7 +12,7 @@ NSDictionary *prefs;
 	if([prefs[@"emulateLAPolicy"] isEqual:@1]) return %orig;
 	HBLogError(@"[AShields] Start Evaluating LocalAuthentication");
 	if(policy == LAPolicyDeviceOwnerAuthenticationWithBiometrics || policy == LAPolicyDeviceOwnerAuthentication) {
-	    [center sendMessageName:@"handleAShieldsVerify" userInfo:@{
+	    [center callExternalMethod:@selector(handleAShieldsVerify:) withArguments:@{
 	    	@"title": localizedReason,
 	    	@"bundleID": [NSBundle mainBundle].bundleIdentifier
 	    }];
@@ -32,8 +31,7 @@ void loadPrefs() {
 	CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, (CFNotificationCallback)loadPrefs, CFSTR("com.rpgfarm.ashields/settingsupdate"), NULL, CFNotificationSuspensionBehaviorCoalesce);
 	loadPrefs();
 
-	center = [CPDistributedMessagingCenter centerNamed:@"com.rpgfarm.a-shields"];
-  	rocketbootstrap_distributedmessagingcenter_apply(center);
+	center = [MRYIPCCenter centerNamed:@"com.rpgfarm.a-shields"];
 
 	[[%c(NSDistributedNotificationCenter) defaultCenter] addObserverForName:[NSString stringWithFormat:@"com.rpgfarm.a-shields.%@.verify", [NSBundle mainBundle].bundleIdentifier] object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *notification) {
 		NSDictionary *result = [notification userInfo];
