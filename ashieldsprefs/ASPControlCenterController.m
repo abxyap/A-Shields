@@ -1,7 +1,11 @@
 #include "ASPControlCenterController.h"
 #import <spawn.h>
 #import <AppList/AppList.h>
+#if THEOS_PACKAGE_SCHEME == rootless
+#define PREFERENCE_IDENTIFIER @"/var/jb/var/mobile/Library/Preferences/com.rpgfarm.ashieldsprefs.plist"
+#elif
 #define PREFERENCE_IDENTIFIER @"/var/mobile/Library/Preferences/com.rpgfarm.ashieldsprefs.plist"
+#endif
 NSMutableDictionary *prefs;
 
 @implementation ASPControlCenterController

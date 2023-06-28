@@ -12,7 +12,11 @@
 
 #import "../ASViewController.h"
 
+#if THEOS_PACKAGE_SCHEME == rootless
+#define PREFERENCE_IDENTIFIER @"/var/jb/var/mobile/Library/Preferences/com.rpgfarm.ashieldsprefs.plist"
+#elif
 #define PREFERENCE_IDENTIFIER @"/var/mobile/Library/Preferences/com.rpgfarm.ashieldsprefs.plist"
+#endif
 NSMutableDictionary *prefs;
 
 @interface PSSpecifier (AShields)

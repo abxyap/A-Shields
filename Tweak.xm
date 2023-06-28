@@ -8,6 +8,12 @@
 #import "./ASViewController.h"
 #import "./ASWindow.h"
 
+#if THEOS_PACKAGE_SCHEME == rootless
+#define PREFERENCE_IDENTIFIER @"/var/jb/var/mobile/Library/Preferences/com.rpgfarm.ashieldsprefs.plist"
+#elif
+#define PREFERENCE_IDENTIFIER @"/var/mobile/Library/Preferences/com.rpgfarm.ashieldsprefs.plist"
+#endif
+
 // socat - UNIX-CONNECT:/var/run/lockdown/syslog.sock
 
 NSMutableDictionary *prefs;
@@ -198,7 +204,7 @@ NSMutableArray *lockedIcons;
 %end
 
 void loadPrefs() {
-	prefs = [[NSMutableDictionary alloc] initWithContentsOfFile:@"/var/mobile/Library/Preferences/com.rpgfarm.ashieldsprefs.plist"];
+	prefs = [[NSMutableDictionary alloc] initWithContentsOfFile:PREFERENCE_IDENTIFIER];
 }
 void ashieldsUnlocked() {
 	NSArray *arr = [lockedIcons copy];

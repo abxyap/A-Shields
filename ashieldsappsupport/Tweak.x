@@ -1,6 +1,12 @@
 #import <MRYIPCCenter.h>
 #import <LocalAuthentication/LocalAuthentication.h>
 
+#if THEOS_PACKAGE_SCHEME == rootless
+#define PREFERENCE_IDENTIFIER @"/var/jb/var/mobile/Library/Preferences/com.rpgfarm.ashieldsprefs.plist"
+#elif
+#define PREFERENCE_IDENTIFIER @"/var/mobile/Library/Preferences/com.rpgfarm.ashieldsprefs.plist"
+#endif
+
 static MRYIPCCenter *center;
 typedef void (^myBlock) (BOOL success, NSError *error);
 myBlock savedReply;
@@ -23,7 +29,7 @@ NSDictionary *prefs;
 %end
 
 void loadPrefs() {
-	prefs = [[NSMutableDictionary alloc] initWithContentsOfFile:@"/var/mobile/Library/Preferences/com.rpgfarm.ashieldsprefs.plist"];
+	prefs = [[NSMutableDictionary alloc] initWithContentsOfFile:PREFERENCE_IDENTIFIER];
 }
 
 %ctor {

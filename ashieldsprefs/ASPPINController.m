@@ -1,5 +1,11 @@
 #import "ASPPINController.h"
 
+#if THEOS_PACKAGE_SCHEME == rootless
+#define PREFERENCE_IDENTIFIER @"/var/jb/var/mobile/Library/Preferences/com.rpgfarm.ashieldsprefs.plist"
+#elif
+#define PREFERENCE_IDENTIFIER @"/var/mobile/Library/Preferences/com.rpgfarm.ashieldsprefs.plist"
+#endif
+
 @implementation ASPPINController
 
 - (BOOL)isBlocked {
@@ -23,14 +29,14 @@
 }
 
 - (BOOL)validatePIN:(NSString *)PIN {
-  NSDictionary *preferences = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/com.rpgfarm.ashieldsprefs.plist"];
+  NSDictionary *preferences = [NSDictionary dictionaryWithContentsOfFile:PREFERENCE_IDENTIFIER];
   NSString *passcode = preferences[@"passcode"];
   return [PIN isEqualToString:passcode];
 }
 
 - (void)setPIN:(NSString *)PIN completion:(id)completion {
   NSMutableDictionary *settings = [NSMutableDictionary dictionary];
-  NSString *settingsPath = @"/var/mobile/Library/Preferences/com.rpgfarm.ashieldsprefs.plist";
+  NSString *settingsPath = PREFERENCE_IDENTIFIER;
   [settings addEntriesFromDictionary:[NSDictionary dictionaryWithContentsOfFile:settingsPath]];
 
   settings[@"passcode"] = PIN;
