@@ -1,7 +1,7 @@
 Package: com.rpgfarm.a-shields
 Name: A-Shields
 Depends: mobilesubstrate, ws.hbang.alderis (>= 1.2)
-Version: 1.6
+Version: 1.7
 Architecture: iphoneos-arm
 Description: Protect your device
 Maintainer: Baw Appie <pp121324@gmail.com>
